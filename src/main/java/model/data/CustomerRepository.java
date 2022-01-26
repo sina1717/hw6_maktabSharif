@@ -4,6 +4,7 @@ import model.Customer;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class CustomerRepository {
@@ -26,7 +27,7 @@ public class CustomerRepository {
         }
     }
 
-    public static void insert(Customer customer) throws SQLException {
+    public  void insert(Customer customer) throws SQLException {
         String sql ="insert into customer (first_name, last_name, national_code, branch_id) VALUES (?,?,?,?);";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1,customer.getFirstName());
@@ -37,7 +38,21 @@ public class CustomerRepository {
         preparedStatement.close();
     }
 
-//    public
+    public Customer findById(int id)throws SQLException{
+        String sql = "SELECT * FROM customer WHERE id = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setInt(1,id);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        Customer customer = null;
+        BankBranchRepository b = new BankBranchRepository();
+        if(resultSet.next()){
+            customer = new Customer(resultSet.getString("first_name"),
+                    resultSet.getString("last_name"),
+                    resultSet.getString("national_code"),
+                    b.findById(resultSet.getInt("branch_id")));
+        }
+        return customer;
+    }
 
 
 
